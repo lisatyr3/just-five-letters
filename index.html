@@ -1,48 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Comfort-First Style Quiz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Comfort-First Style Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.5;
-    }
+<style>
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 720px;
+  margin: auto;
+  padding: 20px;
+  line-height: 1.6;
+}
 
-    h1 {
-      font-size: 1.8em;
-      margin-bottom: 0.5em;
-    }
+h1 {
+  font-size: 1.8em;
+  margin-bottom: 0.3em;
+}
 
-    p {
-      font-size: 1.05em;
-    }
+.question {
+  margin-top: 30px;
+}
 
-    button {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      margin: 10px 0;
-      font-size: 1em;
-      cursor: pointer;
-    }
-  </style>
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 1em;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  border-radius: 6px;
+}
+
+button:hover {
+  background: #e9e9e9;
+}
+
+#result {
+  display: none;
+  margin-top: 40px;
+  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+</style>
 </head>
 
 <body>
 
-  <h1>What’s Your Comfort-First Style?</h1>
-  <p>This quick quiz will help you think about clothing choices that make everyday life easier.</p>
+<h1>What’s Your Comfort-First Style?</h1>
+<p>This quick quiz helps you find clothing choices that make everyday life easier and more comfortable.</p>
 
-  <button>Feeling steady and supported</button>
-  <button>Being comfortable all day</button>
-  <button>Getting dressed quickly and easily</button>
-  <button>Looking polished with minimal effort</button>
+<div id="quiz">
+
+<div class="question">
+<p><strong>1. When getting dressed, what matters most to you?</strong></p>
+<button onclick="answer('steady')">Feeling steady and supported</button>
+<button onclick="answer('comfort')">Being comfortable all day</button>
+<button onclick="answer('easy')">Getting dressed quickly and easily</button>
+<button onclick="answer('polished')">Looking put together with little effort</button>
+</div>
+
+<div class="question">
+<p><strong>2. How do you usually feel about shoes?</strong></p>
+<button onclick="answer('steady')">I want to feel stable when I walk</button>
+<button onclick="answer('comfort')">Cushioning matters most</button>
+<button onclick="answer('easy')">Easy on and off is important</button>
+<button onclick="answer('polished')">Comfortable but presentable</button>
+</div>
+
+<div class="question">
+<p><strong>3. Which clothing frustration sounds familiar?</strong></p>
+<button onclick="answer('steady')">Feeling unsteady or unsure on my feet</button>
+<button onclick="answer('comfort')">Clothes that pinch or feel tight</button>
+<button onclick="answer('easy')">Buttons, zippers, or stiff fabrics</button>
+<button onclick="answer('polished')">Feeling underdressed</button>
+</div>
+
+<div class="question">
+<p><strong>4. How do you prefer to layer?</strong></p>
+<button onclick="answer('steady')">Layers that stay in place</button>
+<button onclick="answer('comfort')">Soft layers I forget I’m wearing</button>
+<button onclick="answer('easy')">Something quick to throw on</button>
+<button onclick="answer('polished')">Layers that finish my look</button>
+</div>
+
+<div class="question">
+<p><strong>5. Accessories should be:</strong></p>
+<button onclick="answer('steady')">Secure and out of the way</button>
+<button onclick="answer('comfort')">Lightweight and comfortable</button>
+<button onclick="answer('easy')">Easy to put on and remove</button>
+<button onclick="answer('polished')">Simple but polished</button>
+</div>
+
+<div class="question">
+<p><strong>6. On low-energy days, what helps most?</strong></p>
+<button onclick="answer('steady')">Supportive shoes</button>
+<button onclick="answer('comfort')">Soft, forgiving clothing</button>
+<button onclick="answer('easy')">Clothes that require no effort</button>
+<button onclick="answer('polished')">One small thing that makes me feel finished</button>
+</div>
+
+</div>
+
+<div id="result"></div>
+
+<script>
+let scores = {
+  steady: 0,
+  comfort: 0,
+  easy: 0,
+  polished: 0
+};
+
+let answered = 0;
+
+function answer(type) {
+  scores[type]++;
+  answered++;
+
+  if (answered === 6) {
+    showResult();
+  }
+}
+
+function showResult() {
+  let winner = Object.keys(scores).reduce((a, b) =>
+    scores[a] > scores[b] ? a : b
+  );
+
+  let text = {
+    steady: "<h2>The Steady & Supported Type</h2><p>You value stability and confidence when moving. Supportive shoes and secure clothing help you feel more comfortable throughout the day.</p>",
+    comfort: "<h2>The All-Day Comfort Type</h2><p>You want clothes you don’t think about once they’re on. Soft fabrics and relaxed fits make the biggest difference.</p>",
+    easy: "<h2>The Easy & Effortless Type</h2><p>You want getting dressed to be quick and frustration-free. Simple layers and pull-on pieces are your go-to.</p>",
+    polished: "<h2>The Polished-But-Comfortable Type</h2><p>You like looking put together without sacrificing comfort. Small details help you feel finished.</p>"
+  };
+
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").innerHTML = text[winner];
+  document.getElementById("result").style.display = "block";
+}
+</script>
 
 </body>
 </html>
