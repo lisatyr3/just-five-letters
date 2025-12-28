@@ -76,23 +76,6 @@ p {
   color: var(--dark);
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  font-size: 1.05rem;
-  text-align: center;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  box-sizing: border-box;
-}
-
-button {
-  margin-top: 12px;
-  padding: 10px 16px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
 .message {
   margin-top: 14px;
   font-size: 0.95rem;
@@ -103,25 +86,22 @@ button {
 <body>
 <div class="game">
   <h1>Just 5 Letters</h1>
-  <p>Guess today’s 5-letter word. You have 6 tries.</p>
+  <p>Type your guess using your keyboard. Press Enter to submit.</p>
 
   <div id="grid"></div>
-
-  <input id="guessInput" maxlength="5" placeholder="Type your guess">
-  <button onclick="submitGuess()">Submit</button>
 
   <div class="message" id="message"></div>
 </div>
 
 <script>
-/* WORD LIST — easy, familiar words */
+/* WORD LIST */
 const WORDS = [
   "GRACE","HEART","SMILE","LIGHT","TRUST","HAPPY","PEACE",
   "ENJOY","FRIEND","LAUGH","KIND","WORTH","BRAVE","CALM",
   "UNITY","FAITH","CLEAR","SWEET","HOPE","THANK"
 ];
 
-/* DAILY WORD LOGIC */
+/* DAILY WORD */
 const startDate = new Date("2025-01-01");
 const today = new Date();
 today.setHours(0,0,0,0);
@@ -130,7 +110,10 @@ const ANSWER = WORDS[dayIndex % WORDS.length];
 
 /* GAME STATE */
 let currentRow = 0;
+let currentGuess = "";
 const maxRows = 6;
+let gameOver = false;
+
 const grid = document.getElementById("grid");
 const message = document.getElementById("message");
 
@@ -146,12 +129,18 @@ function buildGrid() {
 }
 buildGrid();
 
+/* UPDATE TILES WHILE TYPING */
+function updateTiles() {
+  const tiles = document.querySelectorAll(".tile");
+  const start = currentRow * 5;
+  for (let i = 0; i < 5; i++) {
+    tiles[start + i].textContent = currentGuess[i] || "";
+  }
+}
+
 /* SUBMIT GUESS */
 function submitGuess() {
-  const input = document.getElementById("guessInput");
-  const guess = input.value.toUpperCase();
-
-  if (guess.length !== 5) {
+  if (currentGuess.length !== 5) {
     message.textContent = "Please enter 5 letters.";
     return;
   }
@@ -162,9 +151,7 @@ function submitGuess() {
 
   for (let i = 0; i < 5; i++) {
     const tile = tiles[start + i];
-    tile.textContent = guess[i];
-
-    if (guess[i] === ANSWER[i]) {
+    if (currentGuess[i] === ANSWER[i]) {
       tile.classList.add("correct");
       answerLetters[i] = null;
     }
@@ -174,7 +161,7 @@ function submitGuess() {
     const tile = tiles[start + i];
     if (tile.classList.contains("correct")) continue;
 
-    const idx = answerLetters.indexOf(guess[i]);
+    const idx = answerLetters.indexOf(currentGuess[i]);
     if (idx !== -1) {
       tile.classList.add("present");
       answerLetters[idx] = null;
@@ -183,25 +170,37 @@ function submitGuess() {
     }
   }
 
-  if (guess === ANSWER) {
-    message.textContent = "Well done! Come back tomorrow.";
-    disableGame();
+  if (currentGuess === ANSWER) {
+    message.textContent = "Nice job! Thanks for playing. Come back tomorrow for a new word.";
+    gameOver = true;
     return;
   }
 
   currentRow++;
-  input.value = "";
+  currentGuess = "";
 
   if (currentRow === maxRows) {
     message.textContent = `The word was ${ANSWER}. Try again tomorrow!`;
-    disableGame();
+    gameOver = true;
   }
 }
 
-/* DISABLE INPUT */
-function disableGame() {
-  document.getElementById("guessInput").disabled = true;
-}
+/* KEYBOARD INPUT */
+document.addEventListener("keydown", (e) => {
+  if (gameOver) return;
+
+  if (e.key === "Enter") {
+    submitGuess();
+  } else if (e.key === "Backspace") {
+    currentGuess = currentGuess.slice(0, -1);
+    updateTiles();
+  } else if (/^[a-zA-Z]$/.test(e.key)) {
+    if (currentGuess.length < 5) {
+      currentGuess += e.key.toUpperCase();
+      updateTiles();
+    }
+  }
+});
 </script>
 </body>
 </html>
