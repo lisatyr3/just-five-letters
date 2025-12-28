@@ -1,206 +1,411 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Just 5 Letters</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Just 5 Letters</title>
 
-<style>
-:root {
-  --green:#6aaa64;
-  --yellow:#c9b458;
-  --gray:#d3d6da;
-  --dark:#444;
-}
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#1a1a1a;
+      --muted:#666;
+      --tile:#ffffff;
+      --border:#d0d0d0;
+      --shadow:0 1px 0 rgba(0,0,0,.04);
+      --good:#6aaa64;   /* correct spot */
+      --maybe:#c9b458;  /* in word, wrong spot */
+      --bad:#787c7e;    /* not in word */
+      --keybg:#f2f2f2;
+      --max:720px;
+    }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: #fff;
-  display: flex;
-  justify-content: center;
-}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
 
-.game {
-  width: 100%;
-  max-width: 420px;
-  padding: 20px 16px 30px;
-  box-sizing: border-box;
-  text-align: center;
-}
+    .wrap{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:18px 14px 28px;
+      text-align:center;
+    }
 
-h1 {
-  margin: 0 0 6px;
-  font-size: 1.6rem;
-}
+    h1{
+      margin:6px 0 6px;
+      font-size:1.7rem;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 14px;
+      color:var(--muted);
+      font-size:.98rem;
+      line-height:1.3;
+    }
 
-p {
-  margin: 0 0 14px;
-  color: #555;
-  font-size: 0.95rem;
-}
+    .board{
+      display:grid;
+      gap:10px;
+      justify-content:center;
+      margin:14px auto 12px;
+      padding:10px;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin: 16px 0 20px;
-}
+    .row{
+      display:grid;
+      grid-template-columns: repeat(5, 54px);
+      gap:10px;
+      justify-content:center;
+    }
 
-.tile {
-  border: 2px solid #ccc;
-  height: 54px;
-  font-size: 1.6rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-transform: uppercase;
-}
+    .cell{
+      width:54px;
+      height:54px;
+      border:2px solid var(--border);
+      border-radius:10px;
+      background:var(--tile);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.55rem;
+      font-weight:700;
+      text-transform:uppercase;
+      box-shadow:var(--shadow);
+      user-select:none;
+    }
 
-.correct {
-  background: var(--green);
-  border-color: var(--green);
-  color: #fff;
-}
+    /* feedback colors */
+    .cell.good{ background:var(--good); border-color:var(--good); color:#fff; }
+    .cell.maybe{ background:var(--maybe); border-color:var(--maybe); color:#fff; }
+    .cell.bad{ background:var(--bad); border-color:var(--bad); color:#fff; }
 
-.present {
-  background: var(--yellow);
-  border-color: var(--yellow);
-  color: #fff;
-}
+    .controls{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
 
-.absent {
-  background: var(--gray);
-  border-color: var(--gray);
-  color: var(--dark);
-}
+    input[type="text"]{
+      width:min(320px, 92vw);
+      padding:12px 12px;
+      font-size:1.05rem;
+      border:2px solid var(--border);
+      border-radius:10px;
+      outline:none;
+      text-transform:uppercase;
+    }
 
-.message {
-  margin-top: 14px;
-  font-size: 0.95rem;
-}
-</style>
+    button{
+      padding:12px 14px;
+      font-size:1.02rem;
+      border:0;
+      border-radius:10px;
+      cursor:pointer;
+      background:#111;
+      color:#fff;
+    }
+
+    button.secondary{
+      background:#e9e9e9;
+      color:#111;
+      border:1px solid #d6d6d6;
+    }
+
+    .msg{
+      margin:12px auto 0;
+      min-height:26px;
+      font-size:1rem;
+    }
+    .msg.ok{ color:#146c2e; font-weight:600; }
+    .msg.err{ color:#a11; font-weight:600; }
+
+    .footer{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.35;
+    }
+
+    /* Mobile fit */
+    @media (max-width: 380px){
+      .row{ grid-template-columns: repeat(5, 46px); gap:8px; }
+      .cell{ width:46px; height:46px; font-size:1.35rem; border-radius:9px; }
+      .board{ gap:8px; padding:6px; }
+    }
+  </style>
 </head>
 
 <body>
-<div class="game">
-  <h1>Just 5 Letters</h1>
-  <p>Type your guess using your keyboard. Press Enter to submit.</p>
+  <div class="wrap">
+    <h1>Just 5 Letters</h1>
+    <p class="sub">Guess the 5-letter word in 6 tries. Type your guess below and hit Submit.</p>
 
-  <div id="grid"></div>
+    <div id="board" class="board" aria-label="Just 5 Letters board"></div>
 
-  <div class="message" id="message"></div>
-</div>
+    <div class="controls">
+      <input id="guessInput" type="text" inputmode="text" autocomplete="off" maxlength="5"
+             placeholder="Type 5 letters…" aria-label="Guess input" />
+      <button id="submitBtn">Submit</button>
+      <button id="resetBtn" class="secondary" title="Clear today's progress">Reset Today</button>
+    </div>
 
-<script>
-/* WORD LIST */
-const WORDS = [
-  "GRACE","HEART","SMILE","LIGHT","TRUST","HAPPY","PEACE",
-  "ENJOY","FRIEND","LAUGH","KIND","WORTH","BRAVE","CALM",
-  "UNITY","FAITH","CLEAR","SWEET","HOPE","THANK"
-];
+    <div id="message" class="msg" role="status" aria-live="polite"></div>
 
-/* DAILY WORD */
-const startDate = new Date("2025-01-01");
-const today = new Date();
-today.setHours(0,0,0,0);
-const dayIndex = Math.floor((today - startDate) / 86400000);
-const ANSWER = WORDS[dayIndex % WORDS.length];
+    <div class="footer">
+      New word each day at midnight. 🙂
+    </div>
+  </div>
 
-/* GAME STATE */
-let currentRow = 0;
-let currentGuess = "";
-const maxRows = 6;
-let gameOver = false;
+  <script>
+    // ---------------------------
+    // 1) WORD LIST (all 5 letters)
+    // ---------------------------
+    // Keep this list 5-letter words only. Add more anytime.
+    const WORDS = [
+      "APPLE","BEACH","BRAIN","BREAD","BRICK","BRAVE","CHAIR","CHEER","CHESS","CLOUD",
+      "COAST","CRAFT","CRISP","DAISY","DREAM","DRIVE","EARTH","FAITH","FLAME","FRESH",
+      "GIANT","GRACE","GRAPE","GREEN","HONEY","HUMOR","IVORY","JUICE","LEMON","LIGHT",
+      "MAPLE","MUSIC","NURSE","OCEAN","PAINT","PEACE","PEARL","PLANT","PRIDE","QUEEN",
+      "RIVER","ROUND","SHEEP","SMILE","SPARK","SPICE","STONE","SUGAR","SWEET","TABLE",
+      "TEACH","TIGER","TRUST","UNDER","WATER","WHEAT","WORLD","YEAST","ZEBRA"
+    ];
 
-const grid = document.getElementById("grid");
-const message = document.getElementById("message");
+    // Optional: If you want to reject guesses not in this list, set to true.
+    const STRICT_DICTIONARY = false;
 
-/* BUILD GRID */
-function buildGrid() {
-  grid.innerHTML = "";
-  grid.className = "grid";
-  for (let i = 0; i < maxRows * 5; i++) {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-    grid.appendChild(tile);
-  }
-}
-buildGrid();
-
-/* UPDATE TILES WHILE TYPING */
-function updateTiles() {
-  const tiles = document.querySelectorAll(".tile");
-  const start = currentRow * 5;
-  for (let i = 0; i < 5; i++) {
-    tiles[start + i].textContent = currentGuess[i] || "";
-  }
-}
-
-/* SUBMIT GUESS */
-function submitGuess() {
-  if (currentGuess.length !== 5) {
-    message.textContent = "Please enter 5 letters.";
-    return;
-  }
-
-  const tiles = document.querySelectorAll(".tile");
-  const start = currentRow * 5;
-  const answerLetters = ANSWER.split("");
-
-  for (let i = 0; i < 5; i++) {
-    const tile = tiles[start + i];
-    if (currentGuess[i] === ANSWER[i]) {
-      tile.classList.add("correct");
-      answerLetters[i] = null;
+    // ---------------------------
+    // 2) DAILY WORD (changes at midnight, local time)
+    // ---------------------------
+    function ymdLocal(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
     }
-  }
 
-  for (let i = 0; i < 5; i++) {
-    const tile = tiles[start + i];
-    if (tile.classList.contains("correct")) continue;
-
-    const idx = answerLetters.indexOf(currentGuess[i]);
-    if (idx !== -1) {
-      tile.classList.add("present");
-      answerLetters[idx] = null;
-    } else {
-      tile.classList.add("absent");
+    // Days since a fixed local midnight (so it flips at local midnight).
+    function dayIndexLocal(){
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const base = new Date(2025, 0, 1); // Jan 1, 2025 local
+      const msPerDay = 24*60*60*1000;
+      return Math.floor((todayMidnight - base) / msPerDay);
     }
-  }
 
-  if (currentGuess === ANSWER) {
-    message.textContent = "Nice job! Thanks for playing. Come back tomorrow for a new word.";
-    gameOver = true;
-    return;
-  }
-
-  currentRow++;
-  currentGuess = "";
-
-  if (currentRow === maxRows) {
-    message.textContent = `The word was ${ANSWER}. Try again tomorrow!`;
-    gameOver = true;
-  }
-}
-
-/* KEYBOARD INPUT */
-document.addEventListener("keydown", (e) => {
-  if (gameOver) return;
-
-  if (e.key === "Enter") {
-    submitGuess();
-  } else if (e.key === "Backspace") {
-    currentGuess = currentGuess.slice(0, -1);
-    updateTiles();
-  } else if (/^[a-zA-Z]$/.test(e.key)) {
-    if (currentGuess.length < 5) {
-      currentGuess += e.key.toUpperCase();
-      updateTiles();
+    function dailyAnswer(){
+      const idx = dayIndexLocal();
+      const pick = ((idx % WORDS.length) + WORDS.length) % WORDS.length;
+      return WORDS[pick];
     }
-  }
-});
-</script>
+
+    const todayKey = `J5L_${ymdLocal(new Date())}`;
+    const ANSWER = dailyAnswer();
+
+    // ---------------------------
+    // 3) STATE (saved per-day)
+    // ---------------------------
+    const MAX_TRIES = 6;
+    let state = loadState() || {
+      guesses: [],    // array of strings
+      done: false,
+      win: false
+    };
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(todayKey);
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){
+        return null;
+      }
+    }
+
+    function saveState(){
+      try{
+        localStorage.setItem(todayKey, JSON.stringify(state));
+      }catch(e){}
+    }
+
+    // ---------------------------
+    // 4) UI BUILD
+    // ---------------------------
+    const boardEl = document.getElementById("board");
+    const msgEl = document.getElementById("message");
+    const inputEl = document.getElementById("guessInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function setMessage(text, kind=""){
+      msgEl.textContent = text;
+      msgEl.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    function buildBoard(){
+      boardEl.innerHTML = "";
+      for(let r=0; r<MAX_TRIES; r++){
+        const row = document.createElement("div");
+        row.className = "row";
+        for(let c=0; c<5; c++){
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.setAttribute("data-r", r);
+          cell.setAttribute("data-c", c);
+          row.appendChild(cell);
+        }
+        boardEl.appendChild(row);
+      }
+    }
+
+    function scoreGuess(guess, answer){
+      // returns array of "good" | "maybe" | "bad"
+      guess = guess.toUpperCase();
+      answer = answer.toUpperCase();
+
+      const out = Array(5).fill("bad");
+      const answerArr = answer.split("");
+      const used = Array(5).fill(false);
+
+      // first pass: exact matches
+      for(let i=0;i<5;i++){
+        if(guess[i] === answerArr[i]){
+          out[i] = "good";
+          used[i] = true;
+        }
+      }
+      // second pass: present elsewhere
+      for(let i=0;i<5;i++){
+        if(out[i] === "good") continue;
+        const ch = guess[i];
+        let foundIdx = -1;
+        for(let j=0;j<5;j++){
+          if(!used[j] && answerArr[j] === ch){
+            foundIdx = j;
+            break;
+          }
+        }
+        if(foundIdx >= 0){
+          out[i] = "maybe";
+          used[foundIdx] = true;
+        }
+      }
+      return out;
+    }
+
+    function render(){
+      // clear all cells
+      const cells = boardEl.querySelectorAll(".cell");
+      cells.forEach(c=>{
+        c.textContent = "";
+        c.className = "cell";
+      });
+
+      // fill guesses
+      state.guesses.forEach((g, r)=>{
+        const scores = scoreGuess(g, ANSWER);
+        for(let c=0; c<5; c++){
+          const cell = boardEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+          if(!cell) continue;
+          cell.textContent = g[c] ? g[c].toUpperCase() : "";
+          cell.classList.add(scores[c]);
+        }
+      });
+
+      if(state.done){
+        inputEl.disabled = true;
+        submitBtn.disabled = true;
+        if(state.win){
+          setMessage("Nice job! Thanks for playing. Come back tomorrow for a new word.", "ok");
+        }else{
+          setMessage(`Good try! Today’s word was ${ANSWER}. Come back tomorrow for a new one.`, "err");
+        }
+      }else{
+        inputEl.disabled = false;
+        submitBtn.disabled = false;
+        setMessage("");
+        inputEl.focus();
+      }
+    }
+
+    // ---------------------------
+    // 5) INPUT LOGIC (box + submit)
+    // ---------------------------
+    function cleanGuess(val){
+      return (val || "")
+        .toUpperCase()
+        .replace(/[^A-Z]/g, "")
+        .slice(0,5);
+    }
+
+    function isValidGuess(g){
+      if(g.length !== 5) return false;
+      if(!STRICT_DICTIONARY) return true;
+      return WORDS.includes(g);
+    }
+
+    function submitGuess(){
+      if(state.done) return;
+
+      const g = cleanGuess(inputEl.value);
+      inputEl.value = g;
+
+      if(g.length !== 5){
+        setMessage("Type a 5-letter word, then hit Submit.", "err");
+        return;
+      }
+      if(!isValidGuess(g)){
+        setMessage("That word isn’t in my list. Try a different 5-letter word.", "err");
+        return;
+      }
+
+      state.guesses.push(g);
+      saveState();
+
+      if(g === ANSWER){
+        state.done = true;
+        state.win = true;
+        saveState();
+      }else if(state.guesses.length >= MAX_TRIES){
+        state.done = true;
+        state.win = false;
+        saveState();
+      }
+
+      inputEl.value = "";
+      render();
+    }
+
+    inputEl.addEventListener("input", ()=>{
+      inputEl.value = cleanGuess(inputEl.value);
+    });
+
+    inputEl.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){
+        e.preventDefault();
+        submitGuess();
+      }
+    });
+
+    submitBtn.addEventListener("click", submitGuess);
+
+    resetBtn.addEventListener("click", ()=>{
+      localStorage.removeItem(todayKey);
+      state = { guesses: [], done:false, win:false };
+      inputEl.value = "";
+      setMessage("Reset done. You can play today again.", "ok");
+      render();
+    });
+
+    // ---------------------------
+    // 6) INIT
+    // ---------------------------
+    buildBoard();
+    render();
+  </script>
 </body>
 </html>
